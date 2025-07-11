@@ -14,7 +14,23 @@ dotenv.config();
 const app = express();
 
 // Middlewares
-app.use(cors()); // Allows cross-origin requests
+// app.use(cors()); // Allows cross-origin requests
+
+const allowedOrigins = [
+  'http://localhost:3000', // For local development
+  'https://hospital-frontend-lovat.vercel.app/' // Your live frontend URL
+];
+
+app.use(cors({
+  origin: function(origin, callback){
+    if(!origin) return callback(null, true);
+    if(allowedOrigins.indexOf(origin) === -1){
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  }
+}));
 app.use(express.json()); // Allows parsing of JSON request bodies
 
 // Database Connection
@@ -41,6 +57,7 @@ app.use("/api/pharmacy", pharmacyRoutes);
 app.use("/api/ot-staff", require("./routes/otStaffRoutes"));
 
 const PORT = process.env.PORT || 5000;
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
